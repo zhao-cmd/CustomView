@@ -7,4 +7,28 @@
 
     </declare-styleable>
 
+    <declare-styleable name="LoadingView">
+        <!--半个方块的宽度-->
+        <attr name="half_BlockWidth" format="dimension" />
+        <!--方块间隔宽度-->
+        <attr name="blockInterval" format="dimension" />
+        <!--移动方块的初始位置(即空白位置)-->
+        <attr name="initPosition" format="integer" />
+        <!--动画旋转方向是否=顺时针-->
+        <attr name="isClockWise" format="boolean" />
+        <!--方块行数量-->
+        <attr name="lineNumber" format="integer"  />
+        <!--移动方块的移动速度-->
+        <attr name="moveSpeed" format="integer"  />
+        <!--方块颜色-->
+        <attr name="blockColor" format="color"  />
+        <!--移动方块的圆角半径-->
+        <attr name="moveBlockAngle" format="float"  />
+        <!--固定方块的圆角半径-->
+        <attr name="fixBlockAngle" format="float"  />
+        <!--移动方块动画的插值器-->
+        <attr name="move_Interpolator" format="reference"  />
+    </declare-styleable>
+
+
 </resources>

@@ -3,6 +3,8 @@ package com.zjw.customview
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import androidx.core.graphics.withTranslation
 import kotlin.math.min
@@ -40,7 +42,7 @@ class RemoteControl @JvmOverloads constructor(
     private val mPathBottom = Path()
     private val mPathCenter = Path()
 
-    private var mAllRegion=Region()
+    private var mAllRegion = Region()
 
     private val mRegionLeft = Region()
     private val mRegionTop = Region()
@@ -57,8 +59,8 @@ class RemoteControl @JvmOverloads constructor(
 
     private val mList = ArrayList<Region>()
 
-    private var mRectFBig=RectF()
-    private var mRectFLittle=RectF()
+    private var mRectFBig = RectF()
+    private var mRectFLittle = RectF()
 
     private var mRadius = 0
 
@@ -68,14 +70,19 @@ class RemoteControl @JvmOverloads constructor(
     private val BOTTOM = 3
     private val CENTER = 4
 
-    private val mClickFlag = -1
+    private var mClickFlag = -1
 
     private var mWidth = 0
 
-    private val mCurX = 0
+    private var mCurX = 0
     private var mCurY: Int = 0
 
-    fun initPath() {
+    private var mListener: RemoteViewListener? = null
+    fun setListener(mListener: RemoteViewListener) {
+        this.mListener = mListener
+    }
+
+    private fun initPath() {
         mList.clear()
         mPathRight.addArc(mRectFBig, -40F, mBigSweepAngle)
         mPathRight.arcTo(mRectFLittle, 40F, -mLittleSweepAngle)
@@ -141,13 +148,141 @@ class RemoteControl @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        canvas?.save()
         canvas?.withTranslation((measuredWidth / 2).toFloat(), (measuredHeight / 2).toFloat()) {
             drawPath(mPathRight, mPaint)
             drawPath(mPathLeft, mPaint)
             drawPath(mPathBottom, mPaint)
             drawPath(mPathTop, mPaint)
             drawPath(mPathCenter, mPaint)
+
+            when(mClickFlag){
+                RIGHT->{
+                    drawPath(mPathRight,mClickPaint)
+                }
+                BOTTOM->{
+                    drawPath(mPathBottom,mClickPaint)
+                }
+                LEFT->{
+                    drawPath(mPathLeft,mClickPaint)
+                }
+                TOP->{
+                    drawPath(mPathTop,mClickPaint)
+                }
+                CENTER->{
+                    drawPath(mPathCenter,mClickPaint)
+                }
+            }
         }
+        canvas?.restore()
+
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        // 减去移除 的位置
+        mCurX = event!!.x.toInt() - measuredWidth / 2
+        mCurY = event.y.toInt() - measuredHeight / 2
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                containRect(mCurX, mCurY)
+                invalidate()
+            }
+            MotionEvent.ACTION_MOVE->{
+                if (mClickFlag != -1) {
+                    containRect(mCurX, mCurY)
+                }
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                if (mClickFlag != -1) {
+                    when (mClickFlag) {
+                        RIGHT -> {
+                            if (mListener != null) {
+                                mListener!!.clickRight()
+                            }
+                        }
+                        BOTTOM -> {
+                            if (mListener != null) {
+                                mListener!!.clickBottom()
+                            }
+                        }
+                        LEFT -> {
+                            if (mListener != null) {
+                                mListener!!.clickLeft()
+                            }
+                        }
+                        TOP -> {
+                            if (mListener != null) {
+                                mListener!!.clickTop()
+                            }
+                        }
+                        CENTER -> {
+                            if (mListener != null) {
+                                mListener!!.clickCenter()
+                            }
+                        }
+                    }
+                    mClickFlag = -1
+                }
+                invalidate()
+            }
+
+        }
+
+        return true
+    }
+
+    private fun containRect(x: Int, y: Int) {
+        var index = -1
+        for (i in 0 until mList.size) {
+            if (mList[i].contains(x, y)) {
+                mClickFlag = switchRect(i)
+                index = i
+                break
+            }
+        }
+        if (index == -1) {
+            mClickFlag = -1
+        }
+    }
+
+    private fun switchRect(index: Int): Int {
+        return when (index) {
+            0 -> RIGHT
+            1 -> BOTTOM
+            2 -> LEFT
+            3 -> TOP
+            4 -> CENTER
+            else -> -1
+        }
+    }
+
+    public interface RemoteViewListener{
+        /**
+         * 左边按钮被点击了
+         */
+        fun clickLeft()
+
+        /**
+         * 上边按钮被点击了
+         */
+        fun clickTop()
+
+        /**
+         * 右边按钮被点击了
+         */
+        fun clickRight()
+
+        /**
+         * 下边按钮被点击了
+         */
+        fun clickBottom()
+
+        /**
+         * 中间按钮被点击了
+         */
+        fun clickCenter()
     }
 
 }
