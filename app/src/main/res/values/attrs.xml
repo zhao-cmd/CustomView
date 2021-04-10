@@ -9,7 +9,7 @@
 
     <declare-styleable name="LoadingView">
         <!--半个方块的宽度-->
-        <attr name="half_BlockWidth" format="dimension" />
+        <attr name="halfBlockWidth" format="dimension" />
         <!--方块间隔宽度-->
         <attr name="blockInterval" format="dimension" />
         <!--移动方块的初始位置(即空白位置)-->
@@ -27,7 +27,7 @@
         <!--固定方块的圆角半径-->
         <attr name="fixBlockAngle" format="float"  />
         <!--移动方块动画的插值器-->
-        <attr name="move_Interpolator" format="reference"  />
+        <attr name="moveInterpolator" format="reference"  />
     </declare-styleable>
 
 
